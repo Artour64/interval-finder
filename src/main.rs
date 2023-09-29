@@ -19,7 +19,7 @@ fn main() {
 			"\
 help:
  -h --help               |        flag        | display this help message
- -n --no-summary         |        flag        | do not display
+ -n --no-summary         |        flag        | do not display summary at the end
  -m --max-iter           | u64 | default = 30 | max numerator and denominator
  -l --limit              | u64 | default = 0  | tuning limit filter, disabled by default
  -t --target             | f64 | default = 0  | target interval in cents
