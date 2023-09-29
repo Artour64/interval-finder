@@ -14,7 +14,7 @@ fn main() {
 	
 	let args: Vec<String> = env::args().skip(1).collect();
 	
-	if args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
+	if args.is_empty() || args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
 		println!(
 			"\
 help:
