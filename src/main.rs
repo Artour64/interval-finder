@@ -153,15 +153,17 @@ f64 is integer or decimal number"
 			if num != 1 && den % num == 0 {
 				continue;
 			}
-		
-			let interval = Interval::new(num,den);
 			
 			if tuning_limit_filter_on {
 				if !num_is_tuning_limit(den,max_tuning_limit) {
 					continue;
 				}
 			}
-			let reduceable_limit = cmp::min(max_tuning_limit,den);
+			
+			let interval = Interval::new(num,den);
+			
+			//let reduceable_limit = cmp::min(max_tuning_limit,den);
+			let reduceable_limit = cmp::min(reduceable_limit,den);//check for bugs
 			if interval.is_reduceable_limit_optimized(reduceable_limit) {
 				continue;
 			}
