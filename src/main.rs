@@ -164,7 +164,7 @@ f64 is integer or decimal number"
 			
 			//let reduceable_limit = cmp::min(max_tuning_limit,den);
 			let reduceable_limit = cmp::min(reduceable_limit,den);//check for bugs
-			if interval.is_reduceable_limit_optimized(reduceable_limit) {
+			if interval.is_reduceable_limit_precalc_optimized(reduceable_limit) {
 				continue;
 			}
 			
@@ -328,9 +328,9 @@ impl Interval {
 		Interval{ num, den }
 	}
 	
-	fn is_reduceable_limit_optimized(&self, limit: u64) -> bool {
-		self.is_reduceable_limit_precalc_optimized(cmp::min(cmp::min(self.num, self.den), limit))
-	}
+	//fn is_reduceable_limit_optimized(&self, limit: u64) -> bool {
+	//	self.is_reduceable_limit_precalc_optimized(cmp::min(cmp::min(self.num, self.den), limit))
+	//}
 	
 	fn is_reduceable_limit_precalc_optimized(&self, limit: u64) -> bool {
 		let mut factor = 2;
