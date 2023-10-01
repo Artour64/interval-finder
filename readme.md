@@ -1,7 +1,7 @@
-#Interval Finder
+# Interval Finder
 A CLI tool for finding musical just intonation interval ratios.  
 
-##Arguments
+## Arguments
 Running without arguments displays the help message.  
 Invalid arguments are ignored and if the second part of the argument can not be parsed, the default will be used in most cases.  
 
