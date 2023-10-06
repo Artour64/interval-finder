@@ -1,6 +1,6 @@
 # Interval Finder
 A CLI tool for finding musical just intonation interval ratios.  
-To do more analysis on an interval you found, may use the [interval-finder](https://github.com/Artour64/interval-info) project.  
+To do more analysis on an interval you found, may use the [interval-finder](https://github.com/Artour64/interval-info) tool.  
 
 ## Arguments
 Running without arguments displays the help message.  
