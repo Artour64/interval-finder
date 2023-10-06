@@ -26,6 +26,7 @@ help:
  -r --search-cent-radius | f64 | default = 40 | search radius around target in cents
  -d --decimal            | f64 |              | alternative target interval input, as decimal
  -f --fraction           | u64/u64            | alternative target interval input, as fraction
+ -e --edo                | u64/u64            | alternative target interval input, as note of an EDO scale
 
 u64 is a positive integer number 
 f64 is integer or decimal number"
@@ -107,6 +108,20 @@ f64 is integer or decimal number"
 		let i = args.iter().position(|x| x == "--fraction").unwrap() + 1;
 		if i < args.len() {
 			target_cents = Interval::from_str(&args[i]).cents();
+		}
+	}
+	
+	if args.contains(&"-e".to_string()) {
+		let i = args.iter().position(|x| x == "-e").unwrap() + 1;
+		if i < args.len() {
+			let edo_interval = Interval::from_str(&args[i]);//coerced use of struct
+			target_cents = edo_note_cents(edo_interval.den, edo_interval.num);
+		}
+	} else if args.contains(&"--edo".to_string()) {
+		let i = args.iter().position(|x| x == "--edo").unwrap() + 1;
+		if i < args.len() {
+			let edo_interval = Interval::from_str(&args[i]);//coerced use of struct
+			target_cents = edo_note_cents(edo_interval.den, edo_interval.num);
 		}
 	}
 	
@@ -239,6 +254,10 @@ fn num_is_tuning_limit(mut n: u64, limit: u64) -> bool {
 		}
 	}
 	n == 1
+}
+
+fn edo_note_cents(div: u64, note: u64) -> f64 {
+	((1200 * note) as f64) / (div as f64)
 }
 
 fn decimal_to_cents(n: f64) -> f64 {

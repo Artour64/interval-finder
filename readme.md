@@ -45,3 +45,8 @@ Invalid arguments are ignored and if the second part of the argument can not be 
  Alternative way of inputting the target interval to search for.  
  Instead of cents, input the interval as a fraction.  
  e.g. `-f 3/2` or `--fraction 3/2`  
+ 
+ -e --edo \[positive integer\]/\[positive integer\]  
+ Alternative way of inputting the target interval to search for.  
+ Instead of cents, input the interval as a note of an EDO scale.  
+ e.g. `-e 7/12` or `--edo 7/12`  
