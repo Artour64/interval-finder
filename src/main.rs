@@ -14,31 +14,61 @@ fn main() {
 	
 	let args: Vec<String> = env::args().skip(1).collect();
 	
-	if args.is_empty() || args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
+	if args.is_empty() {
+		println!("No arguments passed in.\nPass in a decimal number.\ne.g. 700\nor 700.0");
+		return;
+	}
+	
+	//flag option
+	if args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
 		println!(
 			"\
 help:
- -h --help               |        flag        | display this help message
- -n --no-summary         |        flag        | do not display summary at the end
- -m --max-iter           | u64 | default = 30 | max numerator and denominator
- -l --limit              | u64 | default = 0  | tuning limit filter, disabled by default
- -t --target             | f64 | default = 0  | target interval in cents
- -r --search-cent-radius | f64 | default = 40 | search radius around target in cents
- -d --decimal            | f64 |              | alternative target interval input, as decimal
- -f --fraction           | u64/u64            | alternative target interval input, as fraction
- -e --edo                | u64/u64            | alternative target interval input, as note of an EDO scale
+The last argument is the target interval to search around in cents (f64).
+For example, to input a 12TET fifth, use as '700' the last argument.
+Options -f, -d, -e, and their long forms are flags that change how to input this target interval.
+The examples given below demonstrate how to input a fifth instead of '700' shown above (just fifth for -d and -f, 12TET fifth for -e).
 
+flag options:
+ -h --help       | display this help message
+ -n --no-summary | do not display summary at the end
+ -f --fraction   | target interval as fraction (u64/u64), e.g. '3/2'
+ -d --decimal    | target interval as decimal (f64), e.g. '1.5'
+ -e --edo        | target interval as note of an EDO scale (u64/u64), e.g. '7/12'
+
+argument options:
+ -l --limit              | u64 | default = 0  | tuning limit filter, disabled by default
+ -r --search-cent-radius | f64 | default = 40 | search radius around target in cents
+ -m --max-iter           | u64 | default = 30 | max numerator and denominator
+ 
 u64 is a positive integer number 
 f64 is integer or decimal number"
 		);
 		return;
 	}
 	
-	
 	if args.contains(&"-n".to_string()) || args.contains(&"--no-summary".to_string()) {
 		display_summary = false;
 	}
 	
+	//target interval option flags
+	let last_arg = &args[args.len() -1];
+	
+	if args.contains(&"-f".to_string()) || args.contains(&"--fraction".to_string()) {
+		target_cents = Interval::from_str(last_arg).cents();
+		
+	} else if args.contains(&"-d".to_string()) || args.contains(&"--decimal".to_string()) {
+		target_cents = decimal_to_cents(last_arg.parse::<f64>().unwrap_or(1.0));
+		
+	} else if args.contains(&"-e".to_string()) || args.contains(&"--edo".to_string()) {
+		let edo_interval = Interval::from_str(last_arg);//coerced use of struct
+		target_cents = edo_note_cents(edo_interval.den, edo_interval.num);
+		
+	} else {
+		target_cents = last_arg.parse::<f64>().unwrap_or(target_cents);
+	}
+	
+	//argument options
 	if args.contains(&"-m".to_string()) {
 		let i = args.iter().position(|x| x == "-m").unwrap() + 1;
 		if i < args.len() {
@@ -63,18 +93,6 @@ f64 is integer or decimal number"
 		}
 	}
 	
-	if args.contains(&"-t".to_string()) {
-		let i = args.iter().position(|x| x == "-t").unwrap() + 1;
-		if i < args.len() {
-			target_cents = args[i].parse::<f64>().unwrap_or(target_cents);
-		}
-	} else if args.contains(&"--target-cents".to_string()) {
-		let i = args.iter().position(|x| x == "--target-cents").unwrap() + 1;
-		if i < args.len() {
-			target_cents = args[i].parse::<f64>().unwrap_or(target_cents);
-		}
-	}
-	
 	if args.contains(&"-r".to_string()) {
 		let i = args.iter().position(|x| x == "-r").unwrap() + 1;
 		if i < args.len() {
@@ -84,44 +102,6 @@ f64 is integer or decimal number"
 		let i = args.iter().position(|x| x == "--search-cent-radius").unwrap() + 1;
 		if i < args.len() {
 			search_cent_radius = args[i].parse::<f64>().unwrap_or(search_cent_radius).abs();
-		}
-	}
-	
-	if args.contains(&"-d".to_string()) {
-		let i = args.iter().position(|x| x == "-d").unwrap() + 1;
-		if i < args.len() {
-			target_cents = decimal_to_cents(args[i].parse::<f64>().unwrap_or(1.0));
-		}
-	} else if args.contains(&"--decimal".to_string()) {
-		let i = args.iter().position(|x| x == "--decimal").unwrap() + 1;
-		if i < args.len() {
-			target_cents = decimal_to_cents(args[i].parse::<f64>().unwrap_or(1.0));
-		}
-	}
-	
-	if args.contains(&"-f".to_string()) {
-		let i = args.iter().position(|x| x == "-f").unwrap() + 1;
-		if i < args.len() {
-			target_cents = Interval::from_str(&args[i]).cents();
-		}
-	} else if args.contains(&"--fraction".to_string()) {
-		let i = args.iter().position(|x| x == "--fraction").unwrap() + 1;
-		if i < args.len() {
-			target_cents = Interval::from_str(&args[i]).cents();
-		}
-	}
-	
-	if args.contains(&"-e".to_string()) {
-		let i = args.iter().position(|x| x == "-e").unwrap() + 1;
-		if i < args.len() {
-			let edo_interval = Interval::from_str(&args[i]);//coerced use of struct
-			target_cents = edo_note_cents(edo_interval.den, edo_interval.num);
-		}
-	} else if args.contains(&"--edo".to_string()) {
-		let i = args.iter().position(|x| x == "--edo").unwrap() + 1;
-		if i < args.len() {
-			let edo_interval = Interval::from_str(&args[i]);//coerced use of struct
-			target_cents = edo_note_cents(edo_interval.den, edo_interval.num);
 		}
 	}
 	
