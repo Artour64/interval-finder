@@ -35,7 +35,7 @@ In this case, `-f` is the fraction flag and `3/2` is the target interval as a fr
  Instead of cents, input the interval as a note of an EDO scale.  
  e.g. `-e 7/12` or `--edo 7/12`  
 
-### options with arguments
+### Options With Arguments
  -l --limit \[positive integer\]  
  A filter for the highest tuning limit, which is the highest prime factor allowed in either numerator or denominator.  
  Filter is disabled by default allowing any tuning.  
