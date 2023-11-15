@@ -26,7 +26,7 @@ In this case, `-f` is the fraction flag and `3/2` is the target interval as a fr
  Exact match will not tighten the filter making it useful in combination with the `-f` flag.  
  
  -I --improve-strict  
- Like the `i` flag, but considers above and below together causing more aggressive filtering.  
+ Like the `-i` flag, but considers above and below together causing more aggressive filtering.  
  
  -f --fraction \[positive integer\]/\[positive integer\]  
  Alternative way of inputting the target interval to search for.  
