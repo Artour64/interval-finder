@@ -6,7 +6,7 @@ To do more analysis on an interval you found, you may use the [interval-info](ht
 Running without arguments displays a message that tells you to input an interval.  
 Invalid arguments are ignored and if the second part of the argument can not be parsed, the default will be used in most cases.  
 The last argument is the target interval which is the interval to search around.  
-By default this argument is in cents (integer or decimal) but the flags -f, -d, -e, and their long forms change that as documented below*.  
+By default this argument is in cents (integer or decimal) but the flags `-f`, `-d`, `-e`, and their long forms change that as documented below*.  
 
 *Note: for those options, the flag does not have to be beside the last argument like in the example.  
 As long as the last argument is in the correct form and the corresponding flag is present somewhere in the arguments, it will work.  
@@ -14,11 +14,19 @@ For example, calling `interval-finder -n -f -l 19 3/2` is a valid way of searchi
 In this case, `-f` is the fraction flag and `3/2` is the target interval as a fraction.  
 
 ### Flags
--h --help  
+ -h --help  
  Display this help message.  
 
--n --no-summary  
+ -n --no-summary  
  Do not display summary at the end.  
+ 
+ -i --improve  
+ Filter out more complicated intervals that do not improve accuracy.  
+ Above and below are considered separately.  
+ Exact match will not tighten the filter making it useful in combination with the `-f` flag.  
+ 
+ -I --improve-strict  
+ Like the `i` flag, but considers above and below together causing more aggressive filtering.  
  
  -f --fraction \[positive integer\]/\[positive integer\]  
  Alternative way of inputting the target interval to search for.  

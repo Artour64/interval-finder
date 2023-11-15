@@ -2,6 +2,8 @@ use std::{cmp, env};
 
 fn main() {
 	//default inputs
+	let mut improve = false;
+	let mut improve_strict = false;
 
 	let mut display_summary = true;
 	
@@ -23,23 +25,31 @@ fn main() {
 	if args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
 		println!(
 			"\
-help:
+Help:
+
 The last argument is the target interval to search around in cents (f64).
 For example, to input a 12TET fifth, use as '700' the last argument.
-Options -f, -d, -e, and their long forms are flags that change how to input this target interval.
-The examples given below demonstrate how to input a fifth instead of '700' shown above (just fifth for -d and -f, 12TET fifth for -e).
+Options -f, -d, -e, and their long forms are flags that change
+how to input this target interval.
+The examples given below demonstrate how to input a fifth
+instead of '700' shown above (just fifth for -d and -f, 12TET fifth for -e).
 
-flag options:
- -h --help       | display this help message
- -n --no-summary | do not display summary at the end
- -f --fraction   | target interval as fraction (u64/u64), e.g. '3/2'
- -d --decimal    | target interval as decimal (f64), e.g. '1.5'
- -e --edo        | target interval as note of an EDO scale (u64/u64), e.g. '7/12'
+Flag Options:
+ -h --help       | Display this help message
+ -n --no-summary | Do not display summary at the end
+ -i --improve    | Filter out more complicated intervals that do not improve
+                   accuracy. Above and below are considered separately.
+                   Exact match will not tighten the filter making it useful in 
+                   combination with the -f flag
+ -I --improve-strict | like the -i flag, but considers above and below together
+ -f --fraction   | Target interval as fraction (u64/u64), e.g. '3/2'
+ -d --decimal    | Target interval as decimal (f64), e.g. '1.5'
+ -e --edo        | Target interval as note of an EDO scale (u64/u64), e.g. '7/12'
 
-argument options:
- -l --limit              | u64 | default = 0  | tuning limit filter, disabled by default
- -r --search-cent-radius | f64 | default = 40 | search radius around target in cents
- -m --max-iter           | u64 | default = 30 | max numerator and denominator
+Argument Options:
+ -l --limit              | u64 | default = 0  | Tuning limit filter, disabled by default
+ -r --search-cent-radius | f64 | default = 40 | Search radius around target in cents
+ -m --max-iter           | u64 | default = 30 | Max numerator and denominator
  
 u64 is a positive integer number 
 f64 is integer or decimal number"
@@ -51,8 +61,19 @@ f64 is integer or decimal number"
 		display_summary = false;
 	}
 	
+	if args.contains(&"-i".to_string()) || args.contains(&"--improve".to_string()) {
+		improve = true;
+	}
+	
+	if args.contains(&"-I".to_string()) || args.contains(&"--improve-strict".to_string()) {
+		improve = true;
+		improve_strict = true;
+	}
+	
 	//target interval option flags
 	let last_arg = &args[args.len() -1];
+	
+	
 	
 	if args.contains(&"-f".to_string()) || args.contains(&"--fraction".to_string()) {
 		target_cents = Interval::from_str(last_arg).cents();
@@ -118,8 +139,11 @@ f64 is integer or decimal number"
 	let mut smallest_cent_deviation = search_cent_radius + 1.0;
 	let mut smallest_cent_deviation_interval = Interval::new(0,0);
 	
-	let den_div = ((target_cents + search_cent_radius) / 1200.0f64).exp2();
-	let den_div2 = ((target_cents - search_cent_radius) / 1200.0f64).exp2();
+	let mut upper_target = target_cents + search_cent_radius;
+	let mut lower_target = target_cents - search_cent_radius;
+	
+	let mut den_div = (upper_target / 1200.0f64).exp2();
+	let mut den_div2 = (lower_target / 1200.0f64).exp2();
 	
 	let mut primes = PrimeFactors::new();//reusable memory allocation
 	
@@ -165,6 +189,30 @@ f64 is integer or decimal number"
 			
 			let cents = interval.cents();
 			let cents_deviation = cents - target_cents;
+			
+			if improve {//optimize. Some of this can be put outside the loop.
+				if cents_deviation < 0.0 {
+					if cents < lower_target {
+						break;
+					}
+					lower_target = cents;
+					den_div2 = (lower_target / 1200.0f64).exp2();
+					if improve_strict {
+						upper_target = target_cents - cents_deviation;
+						den_div = (upper_target / 1200.0f64).exp2();
+					}
+				} else if cents_deviation > 0.0 {
+					if cents > upper_target {
+						continue;//maybe break loop into a few loops that can be exited out of early by changing the iteration order
+					}
+					upper_target = cents;
+					den_div = (upper_target / 1200.0f64).exp2();
+					if improve_strict {
+						lower_target = target_cents - cents_deviation;
+						den_div2 = (lower_target / 1200.0f64).exp2();
+					}
+				}//if == 0, keep going. 
+			}
 			
 			let mut cents_deviation_s = "".to_string();
 			if cents_deviation >= 0.0 {
